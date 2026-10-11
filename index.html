@@ -110,10 +110,11 @@ const defaults=[
 
 function normalizeReleaseText(s=''){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'')}
 function releaseMatchesApp(app, release){
-  const hay=normalizeReleaseText([release.name,release.tag_name].join(' '));
+  const assetNames=(release.assets||[]).map(asset=>asset.name||'').join(' ');
+  const hay=normalizeReleaseText([release.name,release.tag_name,assetNames].join(' '));
   const id=normalizeReleaseText(app.id), name=normalizeReleaseText(app.name);
   const aliases={
-    iptvplay:['iptvplay','iptv'],
+    iptvplay:['iptvplay','iptv','ipvplay','ipv','iptv-play','ipv-play'],
     'silent-camera':['silentcamera','silentcam'],
     'bagerhat-vision':['bagerhatvision','bagerhatvisiontv'],
     'jb-mart':['jbmart']
@@ -124,9 +125,9 @@ function releaseMatchesApp(app, release){
 function assetUrl(asset){return asset && asset.browser_download_url ? asset.browser_download_url : ''}
 function imageAssetsForRelease(release){
   const images=(release.assets||[]).filter(a=>/\.(png|jpe?g|webp|gif)$/i.test(a.name||''));
-  const logo=images.find(a=>/(^|[-_. ])(logo|icon|appicon|app-logo)([-_. ]|$)/i.test(a.name||''))
-    || images.find(a=>/^logo\./i.test(a.name||''))
-    || images.find(a=>/^icon\./i.test(a.name||''));
+  const logo=images.find(a=>/(^|[-_. ])(logo|icon|appicon|app-logo|application-logo)([-_. ]|$)/i.test(a.name||''))
+    || images.find(a=>/^(logo|icon|appicon|app-logo|application-logo)\.(png|jpe?g|webp|gif)$/i.test(a.name||''))
+    || images.find(a=>/(logo|icon)/i.test(a.name||''));
   const shots=images.filter(a=>a!==logo && !/(banner|cover|feature|logo|icon)/i.test(a.name||''))
     .sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
   return {logo:assetUrl(logo),shots:shots.slice(0,6).map(assetUrl).filter(Boolean)};
